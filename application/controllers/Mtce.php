@@ -101,9 +101,25 @@ class Mtce extends Application {
         {
             $priparms[$record->id] = $record->name;
         }
+
+        foreach ($this->sizes->all() as $record) {
+            $sizeparms[$record->id] = $record->name;
+        }
+
+        foreach ($this->groups->all() as $record) {
+            $groupparms[$record->id] = $record->name;
+        }
+
+        foreach ($this->statuses->all() as $record) {
+            $statusparms[$record->id] = $record->name;
+        }
+
         $fields = array(
             'ftask' => makeTextField('Task description', 'task', $task->task, 'Work', "What needs to be done?"),
             'fpriority' => makeComboBox('Priority', 'priority', $task->priority, $priparms, "How important is this task?"),
+            'fsize' => makeCombobox('Size', 'size', $task->size, $sizeparms, "How big is this task?"),
+            'fgroup' => makeCombobox('Group', 'group', $task->group, $groupparms, "What is the group the task belongs to?"),
+            'fstatus' => makeCombobox('Status', 'status', $task->status, $statusparms, "What is the status of the current job?"),
             'zsubmit' => makeSubmitButton('Update the TODO task', "Click on home or <back> if you don't want to change anything!", 'btn-success'),
         );
         $this->data = array_merge($this->data, $fields);
@@ -127,8 +143,15 @@ class Mtce extends Application {
         // validate away
         if ($this->form_validation->run())
         {
-            $this->tasks->update($task);
-            $this->alert('Task ' . $task->id . ' updated', 'success');
+            if (empty($task->id))
+            {
+                $this->tasks->add($task);
+                $this->alert('Task ' . $task->id . ' added', 'success');
+            } else
+            {
+                $this->tasks->update($task);
+                $this->alert('Task ' . $task->id . ' updated', 'success');
+            }
         } else
         {
             $this->alert('<strong>Validation errors!<strong><br>' . validation_errors(), 'danger');
